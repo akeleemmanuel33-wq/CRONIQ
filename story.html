@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Story — CRONIQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#000; --bg2:#0a0a0a; --bg3:#111;
+      --surface:rgba(255,255,255,0.04); --surface2:rgba(255,255,255,0.08);
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.13);
+      --gold:#C9A84C; --gold2:#E2BA5A; --gold-dim:rgba(201,168,76,0.12);
+      --red:#7A1515; --red2:#A01E1E; --red-dim:rgba(122,21,21,0.15);
+      --green:#30d158;
+      --text:#F5F5F7; --text2:rgba(245,245,247,0.55); --text3:rgba(245,245,247,0.32);
+      --glass:rgba(0,0,0,0.72);
+      --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;
+      --serif:'Lora',Georgia,serif;
+      --r:14px;
+    }
+    [data-theme="light"] {
+      --bg:#f9f9fb; --bg2:#fff; --bg3:#f0f0f0;
+      --surface:rgba(0,0,0,0.04); --surface2:rgba(0,0,0,0.07);
+      --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.13);
+      --text:#1d1d1f; --text2:rgba(29,29,31,0.58); --text3:rgba(29,29,31,0.32);
+      --glass:rgba(249,249,251,0.85);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;cursor:none;transition:background .3s,color .3s;}
+
+    /* CURSOR */
+    #cur{position:fixed;width:6px;height:6px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .2s,height .2s;}
+    #cur-ring{position:fixed;width:26px;height:26px;border:1px solid rgba(201,168,76,.35);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .25s,height .25s;}
+    body:has(a:hover) #cur,body:has(button:hover) #cur{width:11px;height:11px;}
+    body:has(a:hover) #cur-ring,body:has(button:hover) #cur-ring{width:36px;height:36px;border-color:var(--gold);}
+    #grain{position:fixed;inset:0;pointer-events:none;z-index:9001;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+    /* BG orbs */
+    #bg-svg{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+    .orb{animation:oP 12s ease-in-out infinite;}
+    .orb2{animation:oP 16s ease-in-out infinite reverse;}
+    @keyframes oP{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:.9;transform:scale(1.06);}}
+
+    /* READ PROGRESS BAR */
+    #progress-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--red2),var(--gold));z-index:1000;width:0%;transition:width .1s linear;}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:500;height:52px;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;background:var(--glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--border);animation:navIn .7s ease both;}
+    @keyframes navIn{from{transform:translateY(-52px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .nav-back{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:500;color:var(--text2);text-decoration:none;cursor:none;transition:color .2s;}
+    .nav-back:hover{color:var(--text);}
+    .nav-logo{font-size:.95rem;font-weight:700;letter-spacing:.15em;color:var(--text);text-decoration:none;}
+    .nav-logo em{color:var(--gold);font-style:normal;}
+    .nav-right{display:flex;align-items:center;gap:.6rem;}
+    .nav-icon-btn{width:32px;height:32px;border-radius:8px;background:var(--surface);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:none;transition:background .2s;}
+    .nav-icon-btn:hover{background:var(--surface2);}
+
+    /* HERO */
+    #story-hero{position:relative;z-index:10;padding:7rem 2rem 3rem;max-width:740px;margin:0 auto;animation:fadeUp .8s .1s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+    .story-meta-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+    .cat-pill{font-size:.62rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.22rem .65rem;border-radius:6px;}
+    .vis-pill{font-size:.6rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:.2rem .6rem;border-radius:6px;display:flex;align-items:center;gap:.3rem;}
+    .vis-public{background:rgba(48,209,88,.1);color:#30d158;}
+    .vis-private{background:var(--surface2);color:var(--text3);}
+    .vis-request{background:var(--gold-dim);color:var(--gold);}
+    .meta-dot{width:3px;height:3px;border-radius:50%;background:var(--border2);}
+
+    .story-title{font-family:var(--serif);font-size:clamp(2rem,5vw,3.2rem);font-weight:600;letter-spacing:-.02em;color:var(--text);line-height:1.15;margin-bottom:1.25rem;}
+    .story-excerpt{font-size:1.05rem;font-weight:400;color:var(--text2);line-height:1.75;font-style:italic;letter-spacing:-.01em;border-left:2px solid var(--gold);padding-left:1.1rem;margin-bottom:2rem;}
+
+    /* Author row */
+    .author-row{display:flex;align-items:center;gap:.85rem;padding:1rem 1.25rem;background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);margin-bottom:2rem;}
+    .author-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--red2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#000;flex-shrink:0;}
+    .author-name{font-size:.85rem;font-weight:600;color:var(--text);letter-spacing:-.01em;}
+    .author-sub{font-size:.72rem;color:var(--text3);letter-spacing:-.01em;margin-top:.1rem;}
+    .author-row-right{margin-left:auto;display:flex;align-items:center;gap:.5rem;}
+
+    /* DIVIDER */
+    .story-divider{display:flex;align-items:center;gap:1rem;margin:2rem 0;opacity:.4;}
+    .story-divider::before,.story-divider::after{content:'';flex:1;height:.5px;background:var(--border2);}
+    .story-divider span{font-size:.6rem;letter-spacing:.25em;color:var(--text3);}
+
+    /* STORY BODY */
+    #story-body{position:relative;z-index:10;max-width:680px;margin:0 auto;padding:0 2rem 4rem;animation:fadeUp .8s .25s ease both;}
+    .story-body-inner{font-family:var(--serif);font-size:1.1rem;font-weight:400;line-height:1.9;color:var(--text2);letter-spacing:-.01em;}
+    .story-body-inner p{margin-bottom:1.5rem;}
+    .story-body-inner p:first-child::first-letter{font-size:3.2rem;font-weight:600;color:var(--gold);line-height:.8;float:left;margin:0 .1rem -.1rem 0;font-family:var(--serif);}
+
+    /* GATED BLUR */
+    .gated-blur{position:relative;overflow:hidden;}
+    .gated-blur-inner{filter:blur(8px);user-select:none;pointer-events:none;opacity:.5;}
+    .gated-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:linear-gradient(to bottom,transparent 0%,var(--bg) 60%);}
+    .gated-title{font-size:1rem;font-weight:600;color:var(--text);letter-spacing:-.02em;}
+    .gated-sub{font-size:.8rem;color:var(--text3);letter-spacing:-.01em;text-align:center;max-width:280px;}
+    .btn-req-access{background:var(--gold);color:#000;border:none;padding:.75rem 1.75rem;border-radius:100px;font-family:var(--font);font-size:.82rem;font-weight:600;cursor:none;transition:all .22s;}
+    .btn-req-access:hover{background:var(--gold2);transform:scale(1.04);}
+
+    /* ACTIONS BAR */
+    #actions-bar{position:sticky;bottom:2rem;z-index:200;display:flex;justify-content:center;margin:0 2rem 2rem;animation:fadeUp .7s .5s ease both;}
+    .actions-inner{display:flex;align-items:center;gap:.4rem;background:var(--bg2);border:.5px solid var(--border2);border-radius:100px;padding:.45rem .6rem;backdrop-filter:blur(20px);}
+    .act-btn{display:flex;align-items:center;gap:.35rem;background:none;border:none;cursor:none;font-family:var(--font);font-size:.75rem;font-weight:500;color:var(--text3);padding:.42rem .85rem;border-radius:100px;transition:all .2s;}
+    .act-btn:hover{background:var(--surface2);color:var(--text);}
+    .act-btn.liked{color:var(--red2);}
+    .act-btn.liked svg{fill:var(--red2);}
+    .act-sep{width:.5px;height:18px;background:var(--border2);}
+
+    /* RELATED */
+    #related{position:relative;z-index:10;max-width:740px;margin:0 auto;padding:0 2rem 5rem;}
+    .related-title{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem;}
+    .related-title::before{content:'';width:20px;height:.5px;background:var(--text3);}
+    .related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--border);border:.5px solid var(--border);border-radius:var(--r);overflow:hidden;}
+    .rel-card{background:var(--bg2);padding:1.25rem;cursor:none;transition:background .2s;}
+    .rel-card:hover{background:var(--bg3);}
+    .rel-cat{font-size:.6rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+    .rel-title{font-size:.88rem;font-weight:600;color:var(--text);letter-spacing:-.02em;line-height:1.35;margin-bottom:.35rem;}
+    .rel-date{font-size:.68rem;color:var(--text3);}
+
+    /* COMMENT section */
+    #comments{position:relative;z-index:10;max-width:680px;margin:0 auto;padding:0 2rem 5rem;}
+
+    .comments-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+    .comments-title{font-size:1rem;font-weight:700;letter-spacing:-.03em;color:var(--text);display:flex;align-items:center;gap:.5rem;}
+    .comment-count{font-size:.78rem;font-weight:400;color:var(--text3);background:var(--surface2);padding:.18rem .55rem;border-radius:100px;letter-spacing:-.01em;}
+
+    /* COMPOSE BOX */
+    .compose-box{background:var(--bg2);border:.5px solid var(--border2);border-radius:16px;overflow:hidden;margin-bottom:2rem;transition:border-color .2s;}
+    .compose-box:focus-within{border-color:rgba(201,168,76,.4);}
+    .compose-box::before{content:'';display:block;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.3),transparent);}
+    .compose-top{display:flex;align-items:flex-start;gap:.85rem;padding:1.1rem 1.25rem 0;}
+    .compose-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--red2));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#000;flex-shrink:0;margin-top:.1rem;}
+    .compose-input{flex:1;background:none;border:none;outline:none;font-family:var(--font);font-size:.88rem;font-weight:400;color:var(--text);resize:none;min-height:72px;line-height:1.65;letter-spacing:-.01em;cursor:none;padding-top:.1rem;}
+    .compose-input::placeholder{color:var(--text3);}
+    .compose-bottom{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;border-top:.5px solid var(--border);}
+    .char-counter{font-size:.68rem;font-weight:500;color:var(--text3);letter-spacing:-.01em;transition:color .2s;}
+    .char-counter.warn{color:var(--gold);}
+    .char-counter.over{color:var(--red2);}
+    .compose-actions{display:flex;align-items:center;gap:.5rem;}
+    .btn-cancel-reply{font-size:.72rem;font-weight:500;color:var(--text3);background:none;border:none;cursor:none;font-family:var(--font);padding:.38rem .75rem;border-radius:7px;transition:all .2s;display:none;}
+    .btn-cancel-reply:hover{color:var(--text);background:var(--surface);}
+    .btn-cancel-reply.show{display:inline-flex;}
+    .btn-post{background:var(--gold);color:#000;border:none;padding:.48rem 1.1rem;border-radius:8px;font-family:var(--font);font-size:.75rem;font-weight:700;cursor:none;transition:all .22s;display:flex;align-items:center;gap:.35rem;letter-spacing:-.01em;}
+    .btn-post:hover{background:var(--gold2);transform:scale(1.03);}
+    .btn-post:disabled{opacity:.4;transform:none;cursor:not-allowed;}
+
+    /* COMMENT ITEMS */
+    .comment-item{display:flex;gap:.85rem;padding:1.1rem 0;border-bottom:.5px solid var(--border);animation:commentIn .35s ease both;}
+    .comment-item:last-child{border-bottom:none;}
+    @keyframes commentIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .comment-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#000;flex-shrink:0;}
+    .comment-body{flex:1;min-width:0;}
+    .comment-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;flex-wrap:wrap;}
+    .comment-name{font-size:.8rem;font-weight:600;color:var(--text);letter-spacing:-.01em;}
+    .comment-you{font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--gold-dim);color:var(--gold);padding:.1rem .4rem;border-radius:4px;}
+    .comment-time{font-size:.65rem;color:var(--text3);}
+    .comment-text{font-size:.85rem;color:var(--text2);line-height:1.65;letter-spacing:-.01em;word-break:break-word;}
+
+    /* replying-to banner */
+    .replying-to{font-size:.78rem;color:var(--text3);margin-bottom:.35rem;display:flex;align-items:center;gap:.35rem;}
+    .replying-to svg{flex-shrink:0;}
+    .replying-to strong{color:var(--gold);font-weight:600;}
+
+    /* comment footer */
+    .comment-footer{display:flex;align-items:center;gap:.1rem;margin-top:.5rem;}
+    .c-act{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:none;font-family:var(--font);font-size:.68rem;font-weight:500;color:var(--text3);padding:.28rem .6rem;border-radius:6px;transition:all .18s;}
+    .c-act:hover{background:var(--surface2);color:var(--text);}
+    .c-act.c-liked{color:var(--red2);}
+    .c-act.c-liked svg{fill:var(--red2);}
+
+    /* REPLIES */
+    .replies-wrap{margin-top:.5rem;padding-left:1.1rem;border-left:1.5px solid var(--border2);}
+    .replies-wrap .comment-item{padding:.75rem 0;}
+
+    /* SORT */
+    .sort-row{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;}
+    .sort-lbl{font-size:.7rem;font-weight:500;color:var(--text3);letter-spacing:-.01em;}
+    .sort-btn{font-size:.7rem;font-weight:500;color:var(--text3);background:none;border:none;cursor:none;font-family:var(--font);padding:.28rem .65rem;border-radius:6px;transition:all .18s;}
+    .sort-btn:hover{background:var(--surface2);color:var(--text);}
+    .sort-btn.active{background:var(--surface2);color:var(--text);}
+
+    /* empty */
+    .no-comments{text-align:center;padding:2.5rem 1rem;color:var(--text3);font-size:.82rem;letter-spacing:-.01em;}
+
+    #toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg2);border:.5px solid var(--border2);color:var(--text);padding:.8rem 1.25rem;font-size:.78rem;font-weight:500;border-radius:12px;border-left:2px solid var(--gold);z-index:9990;transform:translateY(80px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);letter-spacing:-.01em;}
+    #toast.show{transform:translateY(0);opacity:1;}
+
+    /* REQ MODAL */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:800;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .modal-bg.open{opacity:1;pointer-events:all;}
+    .modal{background:var(--bg2);border:.5px solid var(--border2);border-radius:16px;width:100%;max-width:420px;overflow:hidden;transform:translateY(20px) scale(.98);transition:transform .3s;position:relative;}
+    .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+    .modal-bg.open .modal{transform:translateY(0) scale(1);}
+    .modal-head{padding:1.25rem 1.5rem;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .modal-title{font-size:1rem;font-weight:700;letter-spacing:-.03em;color:var(--text);}
+    .modal-close{width:26px;height:26px;border-radius:7px;background:var(--surface);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:none;transition:background .2s;}
+    .modal-close:hover{background:var(--surface2);}
+    .modal-body{padding:1.5rem;}
+    .field{margin-bottom:1rem;}
+    .field label{display:block;font-size:.68rem;font-weight:600;color:var(--text3);margin-bottom:.4rem;}
+    .field textarea{width:100%;background:var(--surface);border:.5px solid var(--border2);border-radius:10px;padding:.78rem 1rem;font-family:var(--font);font-size:.88rem;font-weight:400;color:var(--text);outline:none;transition:all .2s;cursor:none;min-height:100px;resize:vertical;}
+    .field textarea:focus{border-color:rgba(201,168,76,.45);box-shadow:0 0 0 3px rgba(201,168,76,.08);}
+    .btn-send{width:100%;background:var(--gold);color:#000;border:none;padding:.85rem;border-radius:10px;font-family:var(--font);font-size:.85rem;font-weight:600;cursor:none;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:.5rem;}
+    .btn-send:hover{background:var(--gold2);transform:scale(1.02);}
+
+    @media(max-width:640px){
+      #story-hero,#story-body,#related,#comments{padding-left:1.25rem;padding-right:1.25rem;}
+      .story-title{font-size:1.8rem;}
+      .story-body-inner{font-size:1rem;}
+    }
+  </style>
+</head>
+<body>
+<div id="cur"></div><div id="cur-ring"></div>
+<div id="grain"></div>
+<div id="toast"></div>
+<div id="progress-bar"></div>
+
+<!-- SVG BG -->
+<svg id="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#C9A84C" stop-opacity="0.1"/><stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/></radialGradient>
+    <radialGradient id="g2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7A1515" stop-opacity="0.14"/><stop offset="100%" stop-color="#7A1515" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse class="orb"  cx="200"  cy="200"  rx="500" ry="400" fill="url(#g2)"/>
+  <ellipse class="orb2" cx="1300" cy="700"  rx="500" ry="380" fill="url(#g1)"/>
+  <path d="M52 38 L38 38 L38 52" stroke="rgba(201,168,76,0.35)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M1388 38 L1402 38 L1402 52" stroke="rgba(201,168,76,0.35)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M52 862 L38 862 L38 848" stroke="rgba(201,168,76,0.35)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <path d="M1388 862 L1402 862 L1402 848" stroke="rgba(201,168,76,0.35)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+</svg>
+
+<!-- REQ MODAL -->
+<div class="modal-bg" id="req-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Request Access</div>
+      <button class="modal-close" onclick="document.getElementById('req-modal').classList.remove('open')">
+        <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.85rem;color:var(--text2);margin-bottom:1.25rem;line-height:1.6;">This story is access-gated. Send a request to the author — they'll decide whether to grant you access.</p>
+      <div class="field">
+        <label>Why do you want to read this? (optional)</label>
+        <textarea id="req-reason" placeholder="Share your reason…"></textarea>
+      </div>
+      <button class="btn-send" onclick="submitReq()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send Request
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="app.html" class="nav-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Vault
+  </a>
+  <a href="index.html" class="nav-logo">CR<em>O</em>NIQ</a>
+  <div class="nav-right">
+    <button class="nav-icon-btn" onclick="toggleTheme()" id="theme-btn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" id="t-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button class="nav-icon-btn" onclick="shareStory()" title="Share">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- STORY HERO -->
+<section id="story-hero">
+  <div class="story-meta-row" id="meta-row"></div>
+  <h1 class="story-title" id="story-title">Loading…</h1>
+  <div class="story-excerpt" id="story-excerpt"></div>
+  <div class="author-row">
+    <div class="author-av" id="auth-av">AO</div>
+    <div>
+      <div class="author-name" id="auth-name">Author</div>
+      <div class="author-sub" id="auth-sub">Archivist · CRONIQ</div>
+    </div>
+    <div class="author-row-right">
+      <a href="profile.html" style="font-size:.72rem;font-weight:500;color:var(--gold);text-decoration:none;cursor:none;padding:.35rem .8rem;border:.5px solid var(--gold-dim);border-radius:8px;transition:background .2s;" onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background=''">View Profile</a>
+    </div>
+  </div>
+  <div class="story-divider"><span>◆</span></div>
+</section>
+
+<!-- STORY BODY -->
+<article id="story-body">
+  <div id="story-content" class="story-body-inner"></div>
+</article>
+
+<!-- FLOATING ACTIONS -->
+<div id="actions-bar">
+  <div class="actions-inner">
+    <button class="act-btn" id="like-btn" onclick="toggleLike()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span id="like-count">24</span>
+    </button>
+    <div class="act-sep"></div>
+    <button class="act-btn" onclick="shareStory()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Share
+    </button>
+    <div class="act-sep"></div>
+    <button class="act-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+      Top
+    </button>
+  </div>
+</div>
+
+<!-- RELATED -->
+<section id="related">
+  <div class="related-title">More from this vault</div>
+  <div class="related-grid" id="related-grid"></div>
+</section>
+
+<!-- COMMENTS -->
+<section id="comments">
+
+  <div class="comments-header">
+    <div class="comments-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Responses
+      <span class="comment-count" id="comment-count">3</span>
+    </div>
+    <div class="sort-row">
+      <span class="sort-lbl">Sort:</span>
+      <button class="sort-btn active" onclick="sortComments('newest',this)">Newest</button>
+      <button class="sort-btn" onclick="sortComments('oldest',this)">Oldest</button>
+      <button class="sort-btn" onclick="sortComments('top',this)">Top</button>
+    </div>
+  </div>
+
+  <!-- COMPOSE -->
+  <div class="compose-box" id="compose-box">
+    <div class="compose-top">
+      <div class="compose-av" id="compose-av">AO</div>
+      <textarea class="compose-input" id="compose-input" placeholder="Write a response…" maxlength="500" oninput="onCompose(this)" rows="3"></textarea>
+    </div>
+    <div class="compose-bottom">
+      <span class="char-counter" id="char-count">500</span>
+      <div class="compose-actions">
+        <button class="btn-cancel-reply" id="cancel-reply" onclick="cancelReply()">Cancel</button>
+        <button class="btn-post" id="post-btn" onclick="postComment()" disabled>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Post
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div id="comments-list"></div>
+
+</section>
+
+<script>
+  /* CURSOR */
+  const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+  (function loop(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+
+  /* PROGRESS */
+  window.addEventListener('scroll',()=>{
+    const b=document.body,d=document.documentElement;
+    const total=Math.max(b.scrollHeight,d.scrollHeight)-d.clientHeight;
+    const pct=(window.scrollY/total)*100;
+    document.getElementById('progress-bar').style.width=pct+'%';
+  });
+
+  /* DEMO STORY DATA */
+  const CAT_COLORS = {
+    Experience:{bg:'rgba(192,48,48,.1)',color:'#C03030'},
+    Education:{bg:'rgba(201,168,76,.1)',color:'#C9A84C'},
+    Reflection:{bg:'rgba(48,209,88,.1)',color:'#30d158'},
+    Secret:{bg:'rgba(255,255,255,.07)',color:'rgba(245,245,247,.5)'},
+    Milestone:{bg:'rgba(10,132,255,.1)',color:'#0a84ff'},
+    Lesson:{bg:'rgba(255,149,0,.1)',color:'#ff9500'}
+  };
+
+  const STORY = {
+    id:1, title:'The Day I Failed My First Exam',
+    category:'Education', visibility:'public', likes:24, liked:false,
+    date:'Feb 12, 2024', readTime:'4 min read',
+    excerpt:'I walked out of that hall and sat under a mango tree for two hours — not crying, just thinking.',
+    author:{name:'Adaeze Obi',handle:'@adaeze_o',initials:'AO'},
+    content:`<p>I walked out of that hall and sat under a mango tree for two hours. Not crying. Not angry. Just thinking.</p>
+<p>The paper had been difficult — not unfairly, just honestly difficult for someone who had studied the wrong things. I had spent three days on chapters that barely appeared and completely ignored the ones that mattered most.</p>
+<p>What I remember most clearly is not the grade. It is the silence in the minutes after. The other students were comparing answers, laughing nervously, calculating pass marks. I was sitting under that tree wondering who I was if I was not the person who got things right.</p>
+<p>I had built an identity around academic performance. Not in an obsessive way — I was never that student who cried over a B. But I had never actually failed anything before. Not officially. Not in writing.</p>
+<p>That failure taught me something that passing never could: that I was capable of picking myself up after a fall that was entirely my own fault. Not circumstances. Not unfairness. Mine.</p>
+<p>I went back the next semester with a different approach. I made a study timetable I actually followed. I found a study group. I asked questions I would previously have been too proud to ask. I passed with distinction.</p>
+<p>The distinction felt good. But it did not feel as important as the mango tree moment. That was the day I became someone who had been tested and chosen to try again.</p>`
+  };
+
+  /* RENDER */
+  const cat = CAT_COLORS[STORY.category]||CAT_COLORS.Reflection;
+  const visMap = {
+    public:`<div class="vis-pill vis-public"><svg width="7" height="7" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Public</div>`,
+    private:`<div class="vis-pill vis-private"><svg width="7" height="7" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/></svg>Private</div>`,
+    request:`<div class="vis-pill vis-request"><svg width="7" height="7" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/></svg>Gated</div>`
+  };
+
+  document.getElementById('meta-row').innerHTML = `
+    <div class="cat-pill" style="background:${cat.bg};color:${cat.color};">${STORY.category}</div>
+    ${visMap[STORY.visibility]}
+    <div class="meta-dot"></div>
+    <span style="font-size:.7rem;color:var(--text3);">${STORY.date}</span>
+    <div class="meta-dot"></div>
+    <span style="font-size:.7rem;color:var(--text3);">${STORY.readTime}</span>`;
+
+  document.getElementById('story-title').textContent = STORY.title;
+  document.getElementById('story-excerpt').textContent = STORY.excerpt;
+  document.getElementById('auth-av').textContent   = STORY.author.initials;
+  document.getElementById('auth-name').textContent = STORY.author.name;
+  document.getElementById('auth-sub').textContent  = STORY.author.handle + ' · Archivist';
+  document.getElementById('like-count').textContent = STORY.likes;
+  document.title = STORY.title + ' — CRONIQ';
+
+  // Content
+  if (STORY.visibility === 'request') {
+    document.getElementById('story-content').innerHTML = `
+      <div class="gated-blur">
+        <div class="gated-blur-inner">${STORY.content}</div>
+        <div class="gated-overlay">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+          <div class="gated-title">This story is access-gated</div>
+          <div class="gated-sub">Send the author a request and wait for their approval to read this story.</div>
+          <button class="btn-req-access" onclick="document.getElementById('req-modal').classList.add('open')">Request Access</button>
+        </div>
+      </div>`;
+  } else {
+    document.getElementById('story-content').innerHTML = STORY.content;
+  }
+
+  // Related
+  const related = [
+    {cat:'Reflection',title:"When I Realized I Was Becoming My Own Person",date:'Dec 19, 2023'},
+    {cat:'Experience',title:"My Father's Last Advice",date:'Jan 3, 2024'},
+    {cat:'Milestone',title:'First salary, first tears',date:'Nov 14, 2023'},
+  ];
+  document.getElementById('related-grid').innerHTML = related.map(r=>{
+    const rc=CAT_COLORS[r.cat]||CAT_COLORS.Reflection;
+    return `<div class="rel-card" onclick="toast('Opening story…')">
+      <div class="rel-cat" style="color:${rc.color};">${r.cat}</div>
+      <div class="rel-title">${r.title}</div>
+      <div class="rel-date">${r.date}</div>
+    </div>`;
+  }).join('');
+
+  /* LIKE */
+  function toggleLike(){
+    STORY.liked=!STORY.liked;
+    STORY.likes+=STORY.liked?1:-1;
+    const btn=document.getElementById('like-btn');
+    btn.classList.toggle('liked',STORY.liked);
+    btn.querySelector('svg').setAttribute('fill',STORY.liked?'currentColor':'none');
+    document.getElementById('like-count').textContent=STORY.likes;
+  }
+  window.toggleLike=toggleLike;
+
+  /* SHARE */
+  function shareStory(){
+    if(navigator.share){navigator.share({title:STORY.title,url:window.location.href});}
+    else{navigator.clipboard.writeText(window.location.href).then(()=>toast('Link copied to clipboard'));}
+  }
+  window.shareStory=shareStory;
+
+  /* REQ */
+  function submitReq(){document.getElementById('req-modal').classList.remove('open');toast('Request sent. Waiting for approval.');}
+  window.submitReq=submitReq;
+  document.getElementById('req-modal').addEventListener('click',e=>{if(e.target===document.getElementById('req-modal'))e.target.classList.remove('open');});
+
+  /* THEME */
+  let dark=true;
+  const moonSVG=`<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+  const sunSVG=`<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>`;
+  function toggleTheme(){dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.getElementById('t-icon').innerHTML=dark?moonSVG:sunSVG;}
+  window.toggleTheme=toggleTheme;
+
+  /* TOAST */
+  function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);}
+
+  /* ══ COMMENTS ENGINE ══ */
+
+  const ME = { name:'You', initials:'AO', gradient:'linear-gradient(135deg,var(--gold),var(--red2))' };
+
+  const AV_COLORS = [
+    'linear-gradient(135deg,#C9A84C,#7A1515)',
+    'linear-gradient(135deg,#4a5e4a,#2a3a2a)',
+    'linear-gradient(135deg,#7A1515,#4a0a0a)',
+    'linear-gradient(135deg,#2a3a8a,#1a2a5a)',
+    'linear-gradient(135deg,#8a6a1a,#5a4a0a)',
+  ];
+
+  let COMMENTS = [
+    { id:1, name:'Fatima Bello', initials:'FB', av:AV_COLORS[0], text:"This reached something I can't quite name. Thank you for sharing it.", ts: Date.now() - 172800000, likes:8, liked:false, replies:[] },
+    { id:2, name:'David Mensah', initials:'DM', av:AV_COLORS[1], text:'The mango tree detail — I felt that. Pure.', ts: Date.now() - 259200000, likes:14, liked:false, replies:[
+      { id:21, name:'Ngozi Eze', initials:'NE', av:AV_COLORS[2], text:'Same. That one line held the whole piece together.', ts: Date.now() - 240000000, likes:3, liked:false }
+    ]},
+    { id:3, name:'Ngozi Eze', initials:'NE', av:AV_COLORS[2], text:'You wrote this like you were writing a letter to yourself five years ago. Beautiful.', ts: Date.now() - 345600000, likes:21, liked:false, replies:[] },
+  ];
+
+  let nextId = 100;
+  let replyingTo = null; // { commentId, name }
+  let sortMode = 'newest';
+
+  function timeAgo(ts) {
+    const diff = Date.now() - ts;
+    const s = Math.floor(diff/1000);
+    if (s < 60)  return 'just now';
+    const m = Math.floor(s/60);
+    if (m < 60)  return m+'m ago';
+    const h = Math.floor(m/60);
+    if (h < 24)  return h+'h ago';
+    const d = Math.floor(h/24);
+    return d === 1 ? 'yesterday' : d+'d ago';
+  }
+
+  function renderComments() {
+    let list = [...COMMENTS];
+    if (sortMode === 'oldest') list.sort((a,b) => a.ts - b.ts);
+    else if (sortMode === 'newest') list.sort((a,b) => b.ts - a.ts);
+    else if (sortMode === 'top') list.sort((a,b) => b.likes - a.likes);
+
+    const totalCount = COMMENTS.reduce((acc, c) => acc + 1 + c.replies.length, 0);
+    document.getElementById('comment-count').textContent = totalCount;
+
+    const el = document.getElementById('comments-list');
+    if (!list.length) {
+      el.innerHTML = `<div class="no-comments">No responses yet. Be the first to write one.</div>`;
+      return;
+    }
+
+    el.innerHTML = list.map(c => commentHTML(c, false)).join('');
+  }
+
+  function commentHTML(c, isReply) {
+    const isMe = c.name === 'You';
+    const repliesHTML = (!isReply && c.replies && c.replies.length)
+      ? `<div class="replies-wrap">${c.replies.map(r => commentHTML(r, true)).join('')}</div>`
+      : '';
+
+    return `
+    <div class="comment-item" id="ci-${c.id}">
+      <div class="comment-av" style="background:${c.av};${isMe?'border:1.5px solid rgba(201,168,76,.4);':''}">
+        ${isMe ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : c.initials}
+      </div>
+      <div class="comment-body">
+        <div class="comment-head">
+          <span class="comment-name">${c.name}</span>
+          ${isMe ? '<span class="comment-you">You</span>' : ''}
+          <span class="comment-time">${timeAgo(c.ts)}</span>
+        </div>
+        ${c.replyTo ? `<div class="replying-to"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>Replying to <strong>${c.replyTo}</strong></div>` : ''}
+        <div class="comment-text">${escHtml(c.text)}</div>
+        <div class="comment-footer">
+          <button class="c-act ${c.liked?'c-liked':''}" onclick="likeComment(${c.id},${isReply?`'reply'`:`'top'`},${isReply?c.parentId:c.id})">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="${c.liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            ${c.likes}
+          </button>
+          ${!isReply ? `<button class="c-act" onclick="startReply(${c.id},'${escAttr(c.name)}')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+            Reply
+          </button>` : ''}
+          ${isMe ? `<button class="c-act" onclick="deleteComment(${c.id},${isReply?`'reply',${c.parentId}`:`'top',${c.id}`})" style="margin-left:auto;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+            Delete
+          </button>` : ''}
+        </div>
+        ${repliesHTML}
+      </div>
+    </div>`;
+  }
+
+  function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function escAttr(s){ return s.replace(/'/g,"\\'"); }
+
+  /* COMPOSE */
+  function onCompose(ta) {
+    const len = ta.value.length;
+    const remaining = 500 - len;
+    const cc = document.getElementById('char-count');
+    cc.textContent = remaining;
+    cc.className = 'char-counter' + (remaining < 50 ? ' warn' : '') + (remaining < 0 ? ' over' : '');
+    document.getElementById('post-btn').disabled = len === 0 || len > 500;
+  }
+  window.onCompose = onCompose;
+
+  /* REPLY */
+  function startReply(id, name) {
+    replyingTo = { commentId: id, name };
+    const ta = document.getElementById('compose-input');
+    ta.placeholder = `Replying to ${name}…`;
+    ta.focus();
+    document.getElementById('cancel-reply').classList.add('show');
+    document.getElementById('compose-box').scrollIntoView({ behavior:'smooth', block:'center' });
+    // Highlight compose
+    document.getElementById('compose-box').style.borderColor = 'rgba(201,168,76,.5)';
+  }
+  window.startReply = startReply;
+
+  function cancelReply() {
+    replyingTo = null;
+    document.getElementById('compose-input').placeholder = 'Write a response…';
+    document.getElementById('cancel-reply').classList.remove('show');
+    document.getElementById('compose-box').style.borderColor = '';
+  }
+  window.cancelReply = cancelReply;
+
+  /* POST */
+  function postComment() {
+    const ta = document.getElementById('compose-input');
+    const text = ta.value.trim();
+    if (!text || text.length > 500) return;
+
+    const btn = document.getElementById('post-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:doSpin .65s linear infinite;"></span>';
+
+    setTimeout(() => {
+      const newComment = {
+        id: nextId++,
+        name: ME.name,
+        initials: ME.initials,
+        av: ME.gradient,
+        text,
+        ts: Date.now(),
+        likes: 0,
+        liked: false,
+        replies: [],
+      };
+
+      if (replyingTo) {
+        // Add as reply
+        const parent = COMMENTS.find(c => c.id === replyingTo.commentId);
+        if (parent) {
+          newComment.replyTo = replyingTo.name;
+          newComment.parentId = parent.id;
+          parent.replies.push(newComment);
+        }
+        cancelReply();
+      } else {
+        COMMENTS.unshift(newComment);
+      }
+
+      // Save to Supabase if available
+      if (window._sb && window._user) {
+        window._sb.from('comments').insert({
+          story_id: STORY.id,
+          user_id: window._user.id,
+          content: text,
+          parent_id: replyingTo ? replyingTo.commentId : null
+        }).catch(()=>{});
+      }
+
+      ta.value = '';
+      document.getElementById('char-count').textContent = '500';
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Post';
+
+      renderComments();
+      toast('Response posted.');
+    }, 400);
+  }
+  window.postComment = postComment;
+
+  /* LIKE COMMENT */
+  function likeComment(id, type, topId) {
+    let target;
+    if (type === 'top') {
+      target = COMMENTS.find(c => c.id === id);
+    } else {
+      const parent = COMMENTS.find(c => c.id === topId);
+      target = parent?.replies.find(r => r.id === id);
+    }
+    if (!target) return;
+    target.liked = !target.liked;
+    target.likes += target.liked ? 1 : -1;
+    renderComments();
+  }
+  window.likeComment = likeComment;
+
+  /* DELETE COMMENT */
+  function deleteComment(id, type, topId) {
+    if (type === 'top') {
+      COMMENTS = COMMENTS.filter(c => c.id !== id);
+    } else {
+      const parent = COMMENTS.find(c => c.id === topId);
+      if (parent) parent.replies = parent.replies.filter(r => r.id !== id);
+    }
+    renderComments();
+    toast('Response deleted.');
+  }
+  window.deleteComment = deleteComment;
+
+  /* SORT */
+  function sortComments(mode, btn) {
+    sortMode = mode;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderComments();
+  }
+  window.sortComments = sortComments;
+
+  /* INIT */
+  renderComments();
+</script>
+</body>
+</html>

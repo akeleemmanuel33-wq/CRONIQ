@@ -1,0 +1,8 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/app", "destination": "/app.html" },
+    { "source": "/story/:id", "destination": "/story.html" },
+    { "source": "/profile/:username", "destination": "/profile.html" }
+  ]
+}
