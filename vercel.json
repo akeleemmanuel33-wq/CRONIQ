@@ -1,0 +1,25 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/app",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/story/:id",
+      "destination": "/story.html"
+    },
+    {
+      "source": "/profile/:username",
+      "destination": "/profile.html"
+    },
+    {
+      "source": "/discover/:id",
+      "destination": "/discover.html"
+    },
+    {
+      "source": "/settings",
+      "destination": "/settings.html"
+    }
+  ]
+}
