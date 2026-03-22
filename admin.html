@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Admin — CRONIQ</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root {
+  --bg:#000; --bg2:#0a0a0a; --surface:rgba(255,255,255,.04);
+  --surface2:rgba(255,255,255,.07); --border:rgba(255,255,255,.08);
+  --border2:rgba(255,255,255,.14); --text:#F5F5F7; --text2:#ebebf0cc;
+  --text3:#ebebf599; --gold:#C9A84C;
+  --red2:#c0392b; --red-dim:rgba(192,57,43,.12);
+  --brown:#8B5E3C; --brown-dim:rgba(139,94,60,.12);
+  --font:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;
+  --r:12px; --topbar:52px;
+}
+[data-theme="light"] {
+  --bg:#f0f0f5; --bg2:#fff; --surface:rgba(0,0,0,.03);
+  --surface2:rgba(0,0,0,.06); --border:rgba(0,0,0,.09); --border2:rgba(0,0,0,.15);
+  --text:#1a1a1e; --text2:#3a3a44; --text3:#6e6e78;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+
+#topbar{
+  position:sticky;top:0;z-index:100;height:var(--topbar);
+  background:var(--bg2);border-bottom:.5px solid var(--border);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;
+}
+.tb-back{display:flex;align-items:center;gap:.4rem;font-size:.82rem;font-weight:500;color:var(--text2);background:none;border:none;cursor:pointer;font-family:var(--font);transition:color .15s;}
+.tb-back:hover{color:var(--text);}
+.tb-logo{font-size:1.05rem;font-weight:800;letter-spacing:-.06em;color:var(--text);}
+.tb-logo em{color:var(--gold);font-style:normal;}
+.theme-btn{width:32px;height:32px;border-radius:9px;background:var(--surface);border:.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.theme-btn:hover{background:var(--surface2);}
+
+#page{max-width:760px;margin:0 auto;padding:1.75rem 1.25rem 6rem;}
+
+.page-title{display:flex;align-items:center;gap:.55rem;font-size:1.5rem;font-weight:800;letter-spacing:-.05em;color:var(--text);margin-bottom:.3rem;}
+.page-sub{font-size:.8rem;color:var(--text3);margin-bottom:1.75rem;}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:2rem;}
+.stat-cell{background:var(--bg2);padding:.9rem 1rem;text-align:center;}
+.stat-num{font-size:1.75rem;font-weight:800;letter-spacing:-.05em;color:var(--text);}
+.stat-lbl{font-size:.58rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:.2rem;}
+
+.section{margin-bottom:2rem;}
+.section-title{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:.75rem;padding-bottom:.45rem;border-bottom:.5px solid var(--border);}
+
+.search-wrap{margin-bottom:.75rem;}
+.search-input{width:100%;background:var(--bg2);border:.5px solid var(--border2);border-radius:10px;padding:.7rem 1rem;font-family:var(--font);font-size:.88rem;color:var(--text);outline:none;transition:border-color .18s;}
+.search-input:focus{border-color:var(--brown);}
+.search-input::placeholder{color:var(--text3);}
+
+#search-results,.user-list{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.user-row{display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;border-bottom:.5px solid var(--border);transition:background .15s;}
+.user-row:last-child{border-bottom:none;}
+.user-row:hover{background:var(--surface);}
+.u-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--brown),#5c3d1e);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;overflow:hidden;}
+.u-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.u-info{flex:1;min-width:0;}
+.u-name{display:flex;align-items:center;gap:.3rem;font-size:.86rem;font-weight:600;color:var(--text);}
+.u-name-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+.u-handle{font-size:.7rem;color:var(--text3);margin-top:.1rem;}
+.u-actions{display:flex;gap:.4rem;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;}
+
+.vtick{display:inline-block;vertical-align:middle;flex-shrink:0;width:15px;height:15px;}
+
+.btn-verify{background:var(--brown);color:#fff;border:none;padding:.35rem .8rem;border-radius:7px;font-family:var(--font);font-size:.7rem;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap;}
+.btn-verify:hover{background:#6d4a2e;}
+.btn-revoke{background:var(--red-dim);color:var(--red2);border:.5px solid rgba(192,57,43,.25);padding:.35rem .8rem;border-radius:7px;font-family:var(--font);font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-revoke:hover{background:rgba(192,57,43,.2);}
+.btn-delete{background:rgba(192,57,43,.06);color:var(--red2);border:.5px solid rgba(192,57,43,.18);padding:.35rem .8rem;border-radius:7px;font-family:var(--font);font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-delete:hover{background:rgba(192,57,43,.18);}
+.badge-admin{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brown);background:var(--brown-dim);border:.5px solid rgba(139,94,60,.25);border-radius:5px;padding:.12rem .42rem;}
+
+.empty-row{padding:1.75rem;text-align:center;color:var(--text3);font-size:.8rem;line-height:1.6;}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .22s;}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border:.5px solid var(--border2);border-radius:16px;padding:1.4rem;max-width:380px;width:100%;}
+.modal-title{font-size:.98rem;font-weight:700;margin-bottom:.4rem;}
+.modal-body{font-size:.83rem;color:var(--text2);margin-bottom:1.2rem;line-height:1.6;}
+.modal-actions{display:flex;gap:.5rem;justify-content:flex-end;}
+.btn-cancel{background:var(--surface);border:.5px solid var(--border2);color:var(--text);padding:.48rem 1rem;border-radius:8px;font-family:var(--font);font-size:.8rem;cursor:pointer;}
+.btn-confirm-del{background:var(--red2);color:#fff;border:none;padding:.48rem 1rem;border-radius:8px;font-family:var(--font);font-size:.8rem;font-weight:700;cursor:pointer;}
+
+/* Toast */
+#toast{position:fixed;bottom:5rem;right:1.25rem;z-index:9999;background:var(--bg2);border:.5px solid var(--border2);color:var(--text);padding:.7rem 1rem;font-size:.78rem;font-weight:500;border-radius:10px;border-left:2.5px solid var(--brown);transform:translateY(60px);opacity:0;transition:all .32s cubic-bezier(.34,1.56,.64,1);max-width:260px;pointer-events:none;}
+#toast.show{transform:translateY(0);opacity:1;}
+
+/* Mobile footer */
+#mob-back{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--bg2);border-top:.5px solid var(--border);padding:.7rem 1rem;padding-bottom:calc(.7rem + env(safe-area-inset-bottom,0px));}
+.mob-back-btn{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;background:var(--surface);border:.5px solid var(--border2);color:var(--text);padding:.6rem;border-radius:10px;font-family:var(--font);font-size:.82rem;font-weight:500;cursor:pointer;}
+
+@media(max-width:640px){
+  #page{padding:1.25rem .9rem 6rem;}
+  .page-title{font-size:1.2rem;}
+  .stat-num{font-size:1.4rem;}
+  .stat-cell{padding:.75rem .6rem;}
+  .u-name{font-size:.8rem;}
+  .btn-verify,.btn-revoke,.btn-delete{padding:.3rem .65rem;font-size:.67rem;}
+  .user-row{padding:.7rem .85rem;gap:.6rem;}
+  .u-av{width:32px;height:32px;font-size:.64rem;}
+  #mob-back{display:block;}
+  #topbar{padding:0 1rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <button class="tb-back" onclick="history.back()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </button>
+  <div class="tb-logo">CR<em>O</em>NIQ</div>
+  <div class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </div>
+</div>
+
+<div id="page">
+
+  <div class="page-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#8B5E3C"/><path d="M8 12l2.5 2.5L16 9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Verification Control
+  </div>
+  <div class="page-sub">CRONIQ Admin Dashboard</div>
+
+  <div class="stats-row">
+    <div class="stat-cell"><div class="stat-num" id="stat-total">—</div><div class="stat-lbl">Users</div></div>
+    <div class="stat-cell"><div class="stat-num" id="stat-verified">—</div><div class="stat-lbl">Verified</div></div>
+    <div class="stat-cell"><div class="stat-num" id="stat-stories">—</div><div class="stat-lbl">Stories</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Search & Verify</div>
+    <div class="search-wrap">
+      <input type="text" class="search-input" id="search-input" placeholder="Search by username or name…" oninput="doSearch(this.value)" autocomplete="off"/>
+    </div>
+    <div id="search-results"><div class="empty-row">Type a username to search…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Verified Archivists</div>
+    <div id="verified-list" class="user-list"><div class="empty-row">Loading…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">All Users</div>
+    <div id="all-users-list" class="user-list"><div class="empty-row">Loading…</div></div>
+  </div>
+
+</div>
+
+<!-- Delete confirm modal -->
+<div class="modal-bg" id="del-modal">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--red2);">Delete User</div>
+    <div class="modal-body" id="del-modal-body">This will permanently delete this account.</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDelModal()">Cancel</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile back -->
+<div id="mob-back">
+  <button class="mob-back-btn" onclick="location.href='app.html'">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to CRONIQ
+  </button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://xhyxzpiubdynjijxsdus.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoeXh6cGl1YmR5bmppanhzZHVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1Nzg1NDksImV4cCI6MjA4ODE1NDU0OX0.843o70SGpZ0WqlrWFi73yenUaSnzSqbtREbhutnNwRg';
+const ADMIN_EMAIL = 'bigcroniq@gmail.com';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $  = id => document.getElementById(id);
+const ini = s => (s||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+const TICK = '<svg class="vtick" viewBox="0 0 24 24" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#8B5E3C"/><path d="M8 12l2.5 2.5L16 9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+let CUR_USER = null;
+let pendingDeleteId = null;
+let searchTimer = null;
+let darkMode = true;
+
+async function boot() {
+  const saved = localStorage.getItem('croniq_theme');
+  if (saved === 'light') { darkMode = false; document.documentElement.setAttribute('data-theme','light'); }
+
+  const { data: { session } } = await sb.auth.getSession();
+  CUR_USER = session?.user || null;
+
+  if (!CUR_USER || CUR_USER.email !== ADMIN_EMAIL) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:1rem;background:var(--bg);"><div style="font-size:1.1rem;font-weight:700;color:#F5F5F7;">Access Denied</div><div style="color:#888;font-size:.85rem;text-align:center;max-width:260px;">This page is only accessible to the CRONIQ administrator.</div><button onclick="location.href=\'app.html\'" style="margin-top:.75rem;background:#C9A84C;color:#000;border:none;padding:.6rem 1.4rem;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;">Return to App</button></div>';
+    return;
+  }
+
+  loadStats();
+  loadVerified();
+  loadAllUsers();
+}
+
+async function loadStats() {
+  try {
+    const [r1, r2, r3] = await Promise.all([
+      sb.from('profiles').select('*', { count:'exact', head:true }),
+      sb.from('profiles').select('*', { count:'exact', head:true }).eq('is_verified', true),
+      sb.from('stories').select('*',  { count:'exact', head:true }),
+    ]);
+    if ($('stat-total'))    $('stat-total').textContent    = r1.count ?? 0;
+    if ($('stat-verified')) $('stat-verified').textContent = r2.count ?? 0;
+    if ($('stat-stories'))  $('stat-stories').textContent  = r3.count ?? 0;
+  } catch(e) { console.warn('loadStats:', e); }
+}
+
+async function loadVerified() {
+  const el = $('verified-list');
+  try {
+    const { data, error } = await sb.from('profiles')
+      .select('id,username,full_name,avatar_url,is_verified,is_admin')
+      .eq('is_verified', true).order('full_name');
+    if (error) {
+      el.innerHTML = '<div class="empty-row">Column missing — run <strong>add_verification.sql</strong> in Supabase first.</div>';
+      return;
+    }
+    if (!data?.length) { el.innerHTML = '<div class="empty-row">No verified archivists yet.</div>'; return; }
+    el.innerHTML = data.map(u => userRow(u)).join('');
+  } catch(e) { el.innerHTML = `<div class="empty-row">Error: ${esc(e.message)}</div>`; }
+}
+
+async function loadAllUsers() {
+  const el = $('all-users-list');
+  try {
+    const { data, error } = await sb.from('profiles')
+      .select('id,username,full_name,avatar_url,is_verified,is_admin')
+      .order('created_at', { ascending: false }).limit(100);
+    if (error) {
+      el.innerHTML = '<div class="empty-row">Column missing — run <strong>add_verification.sql</strong> in Supabase first.</div>';
+      return;
+    }
+    if (!data?.length) { el.innerHTML = '<div class="empty-row">No users found.</div>'; return; }
+    el.innerHTML = data.map(u => userRow(u)).join('');
+  } catch(e) { el.innerHTML = `<div class="empty-row">Error: ${esc(e.message)}</div>`; }
+}
+
+function doSearch(q) {
+  clearTimeout(searchTimer);
+  const el = $('search-results');
+  const val = q.trim();
+  if (!val) { el.innerHTML = '<div class="empty-row">Type a username to search…</div>'; return; }
+  el.innerHTML = '<div class="empty-row">Searching…</div>';
+  searchTimer = setTimeout(async () => {
+    try {
+      const { data, error } = await sb.from('profiles')
+        .select('id,username,full_name,avatar_url,is_verified,is_admin')
+        .or(`username.ilike.%${val}%,full_name.ilike.%${val}%`)
+        .limit(10);
+      if (error || !data?.length) {
+        el.innerHTML = '<div class="empty-row">No users found.</div>'; return;
+      }
+      el.innerHTML = data.map(u => userRow(u)).join('');
+    } catch(e) { el.innerHTML = `<div class="empty-row">Error: ${esc(e.message)}</div>`; }
+  }, 280);
+}
+
+function userRow(u) {
+  const name = u.full_name || u.username || 'Unknown';
+  const isV  = u.is_verified || false;
+  const isA  = u.is_admin    || false;
+  const avImg = u.avatar_url
+    ? `<img src="${esc(u.avatar_url)}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`
+    : ini(name);
+
+  let actions = '';
+  if (isA) {
+    actions = `<span class="badge-admin">Platform Admin</span>`;
+  } else {
+    actions = (isV
+      ? `<button class="btn-revoke" onclick="setVerified('${u.id}',false,'${esc(u.username||'')}')">Revoke</button>`
+      : `<button class="btn-verify" onclick="setVerified('${u.id}',true,'${esc(u.username||'')}')">Verify</button>`)
+      + `<button class="btn-delete" onclick="openDelModal('${u.id}','${esc(name)}')">Delete</button>`;
+  }
+
+  return `<div class="user-row" id="urow-${u.id}">
+    <div class="u-av">${avImg}</div>
+    <div class="u-info">
+      <div class="u-name"><span class="u-name-text">${esc(name)}</span>${isV ? ' ' + TICK : ''}</div>
+      <div class="u-handle">@${esc(u.username||'')}${isA ? ' &middot; <span style="color:var(--brown);font-weight:700;font-size:.65rem;">ADMIN</span>' : ''}</div>
+    </div>
+    <div class="u-actions">${actions}</div>
+  </div>`;
+}
+
+async function setVerified(userId, grant, username) {
+  const { error } = await sb.rpc('admin_set_verified', {
+    target_id: userId,
+    grant_val: grant
+  });
+  if (error) { toast(error.message, true); return; }
+  toast(grant ? `@${username} verified ✓` : `@${username} verification removed`);
+  loadVerified(); loadAllUsers(); loadStats();
+  const sq = $('search-input')?.value;
+  if (sq) doSearch(sq);
+}
+window.setVerified = setVerified;
+
+function openDelModal(userId, name) {
+  pendingDeleteId = userId;
+  $('del-modal-body').textContent = `Delete "${name}"? This removes their profile, stories, and all data permanently.`;
+  $('del-modal').classList.add('open');
+}
+function closeDelModal() { pendingDeleteId = null; $('del-modal').classList.remove('open'); }
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const { error } = await sb.rpc('admin_delete_profile', {
+    target_id: pendingDeleteId
+  });
+  if (error) { toast('Delete failed: ' + error.message, true); closeDelModal(); return; }
+  toast('User deleted');
+  closeDelModal();
+  loadStats(); loadVerified(); loadAllUsers();
+}
+window.openDelModal  = openDelModal;
+window.closeDelModal = closeDelModal;
+window.confirmDelete = confirmDelete;
+
+function toggleTheme() {
+  darkMode = !darkMode;
+  document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  localStorage.setItem('croniq_theme', darkMode ? 'dark' : 'light');
+}
+window.toggleTheme = toggleTheme;
+
+let toastTimer = null;
+function toast(msg, isErr = false) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.style.borderLeftColor = isErr ? 'var(--red2)' : 'var(--brown)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+$('del-modal').addEventListener('click', e => { if (e.target === $('del-modal')) closeDelModal(); });
+
+boot();
+</script>
+</body>
+</html>

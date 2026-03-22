@@ -1,0 +1,29 @@
+THIS IS MY IDEA MY WEBSITE OF MY LIFE STORIES SECTIONS OF DIFFERENT STORY THERE WILL BE PUBLIC AND THEN THERE WOULD BE PRIVATE THERE WOULD BE AN AVENUE TO LIKE ANY OF MY STORIES FOR THE SECRET STORIES PEOPLE ARE TO REQUEST TO ME AND WAIT FOR MY APPROVAL AS THE ADMINISTRATOR TO APPROVE THEN TO VEIW IT AND THEN PEOPLE CAN SEE STORIES BASED ON MY EXPERENCIENCE OR STORIES BASED ON MY LIFE STORIES STTORIES BASED ON MY EDUCATION ALL TO MY SELF THIS WOULD BE FOR ME ONLY  NOW YOU UNDERSTAND THIS NOW IMAGINE EVERY USER ALSO HAS THE ABILITY TO DO THIS TOO 
+
+
+croniq/
+│
+├── index.html              ← Landing page + Login/Signup
+├── app.html                ← Main dashboard (after login)
+├── story.html              ← Single story read page
+├── profile.html            ← Any user's public profile
+├── settings.html           ← Edit your profile & account
+│
+├── css/
+│   └── style.css           ← All styles (already built)
+│
+├── js/
+│   ├── supabase.js         ← Supabase client + helpers (already built)
+│   ├── utils.js            ← Toast, loading, format helpers (already built)
+│   ├── auth.js             ← Login, signup, logout logic
+│   ├── stories.js          ← Create, read, edit, delete stories
+│   ├── upload.js           ← Image/file upload to Supabase Storage ⬅ NEW
+│   ├── requests.js         ← Send, approve, reject access requests
+│   ├── likes.js            ← Like and unlike stories
+│   ├── notifications.js    ← Bell icon, mark as read
+│   └── app.js              ← Dashboard wiring (feeds, routing)
+│
+├── supabase/
+│   └── schema.sql          ← All tables + RLS (already built)
+│
+└── vercel.json             ← Routing config (already built)
